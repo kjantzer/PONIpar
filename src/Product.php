@@ -204,12 +204,12 @@ class Product {
 	}
 
 	public function getPublishingStatusString(){
-		$status = $this->PublishingStatus();
+		$status = $this->getPublishingStatus();
 		return isset(self::$productStatus[$status]) ? self::$productStatus[$status] : 'Unknown';
 	}
 
 	public function isActive(){
-		return in_array($this->publishingStatus(),['04','02']); // 'Active' and `Forthcoming` (list 64)
+		return in_array($this->getPublishingStatus(),['04','02']); // 'Active' and `Forthcoming` (list 64)
 	}
 
 	/**
@@ -239,7 +239,7 @@ class Product {
 		if($this->version >= '3.0') {
 			return $this->get('DescriptiveDetail/ProductFormDetail')[0]->nodeValue;
 		} else {
-			return $this->get('ProductFormDetail')[0]->nodeValue;
+			return count($this->get('ProductFormDetail')) ? $this->get('ProductFormDetail')[0]->nodeValue : null;
 		}
 	}
 
@@ -263,7 +263,7 @@ class Product {
 		if($this->version >= '3.0') {
 			return $this->get('DescriptiveDetail/EpubTechnicalProtection')[0]->nodeValue;
 		} else {
-			return $this->get('EpubTechnicalProtection')[0]->nodeValue;
+			return count($this->get('EpubTechnicalProtection')) ? $this->get('EpubTechnicalProtection')[0]->nodeValue : null;
 		}
 	}
 
@@ -271,8 +271,9 @@ class Product {
 	{
 		if($this->version >= '3.0') {
 			return $this->get('DescriptiveDetail/Language', 'Language');
-		}
-		return null;
+		} else {
+            		return $this->get('Language');
+        	}
 	}
 
 	/**
@@ -291,8 +292,9 @@ class Product {
 	{
 		if($this->version >= '3.0') {
 			return $this->get('PublishingDetail/Publisher', 'Publisher');
+		} else {
+		    return $this->get('Publishers');
 		}
-		return null;
 	}
 
 	/**
@@ -456,7 +458,7 @@ class Product {
 		if( $this->version >= '3.0' )
 			return $this->get('DescriptiveDetail/EditionType')[0]->nodeValue;
 		else
-			return $this->get('EditionTypeCode')[0]->nodeValue;
+			return count($this->get('EditionTypeCode')) ? $this->get('EditionTypeCode')[0]->nodeValue : null;
 	}
 
 	/**
@@ -508,8 +510,9 @@ class Product {
 		if( $this->version >= '3.0' )
 			return $this->get('PublishingDetail/CopyrightStatement/CopyrightYear')[0]->nodeValue;
 		else{
-			$year = $this->get('CopyrightYear')[0]->nodeValue;
-			if( !$year ) $year = $this->get('CopyrightStatement/CopyrightYear')[0]->nodeValue;
+			$year = count($this->get('CopyrightYear')) ? $this->get('CopyrightYear')[0]->nodeValue : null;
+			if( !$year ) $year = count($this->get('CopyrightStatement/CopyrightYear')) ?
+                		$this->get('CopyrightStatement/CopyrightYear')[0]->nodeValue : null;
 			return $year;
 		}
 	}
@@ -524,10 +527,12 @@ class Product {
 
 		$prefix = $this->version >= '3.0' ? 'PublishingDetail/CopyrightStatement' : 'CopyrightStatement';
 
-		$name = $this->get($prefix.'/CopyrightOwner/CorporateName')[0]->nodeValue;
+		$name = count($this->get($prefix.'/CopyrightOwner/CorporateName')) ?
+            		$this->get($prefix.'/CopyrightOwner/CorporateName')[0]->nodeValue : null;
 
 		if( !$name )
-			$name = $this->get($prefix.'/CopyrightOwner/PersonName')[0]->nodeValue;
+			$name = count($this->get($prefix.'/CopyrightOwner/PersonName')) ?
+                		$this->get($prefix.'/CopyrightOwner/PersonName')[0]->nodeValue : null;
 
 		$year = $this->getCopyrightYear();
 
